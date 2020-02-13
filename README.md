@@ -65,4 +65,5 @@ E.g. On Debian-based distributions:
 
 ## Resources
 
+- Theory Of Algorithms module course work (including documents, videos and lectures) provided by [Ian McLoughlin](https://github.com/ianmcloughlin/).
 - [The magic behind configure, make, make install](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install). How to use autotools for easier project build, distribution and installation.
