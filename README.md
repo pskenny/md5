@@ -63,3 +63,6 @@ E.g. On Debian-based distributions:
 > make install
 ```
 
+## Resources
+
+- [The magic behind configure, make, make install](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install). How to use autotools for easier project build, distribution and installation.
