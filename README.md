@@ -22,46 +22,22 @@ E.g. On Debian-based distributions:
 ### Installation
 
 1. Clone repo
-
-```bash
-> git clone https://github.com/pskenny/md5
-> cd md5
-```
-
 2. Set up an m4 environment
-
-```bash
-> aclocal
-```
-
 3. Generate configure file fron configure.ac
-
-```bash
-> autoconf
-```
-
 4. Generate Makefile.in from Makefile.am
-
-```bash
-> automake --add-missing
-```
-
 5. Generate Makefile from Makefile.in
-
-```bash
-> ./configure
-```
-
 6. Build project
-
-```bash
-> make
-```
-
 7. Install
 
 ```bash
-> make install
+> git clone https://github.com/pskenny/md5 # 1
+> cd md5
+> aclocal # 2
+> autoconf # 3
+> automake --add-missing # 4
+> ./configure # 5
+> make # 6
+> make install # 7
 ```
 
 ## Resources
