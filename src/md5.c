@@ -4,7 +4,7 @@
 #include<stdio.h>
 #include<stdint.h>
 
-// Initial buffer values from Section 
+// Initial buffer values from Section 3.3
 uint32_t buffer[] = {
 	0x01234567,
 	0x89abcdef,
