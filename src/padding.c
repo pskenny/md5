@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+// block of data to process
+union block
+{
+    uint64_t sixtyFour[8];
+    uint32_t thirtyTwo[16];
+    uint8_t eight[64];
+};
+
 // Return the number of 0 bytes to output
 uint8_t noZeroBytes(uint8_t noBits)
 {
