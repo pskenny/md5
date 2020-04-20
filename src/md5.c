@@ -129,17 +129,18 @@ int main(int argc, char argv[])
 	uint64_t nobits = 0;
 	enum flag status = READ;
 
+	// Read next 512 bit block from file, then calculate hash
 	while(nextblock(&M, file, nobits, status))
 	{
 		// Calculate the next hash value
-		nexthash(&M, &H);
+		nexthash(&M, &buffer);
 	}
 
 	// Close file
 	fclose(file);
 
 	// Output hash
-	for(int i = 0; i < 8; i++)
+	for(int i = 0; i < 4; i++)
 	{
 		printf("%02" PRIX32, H[i]);
 	}
