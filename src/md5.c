@@ -22,6 +22,8 @@ union block
     uint8_t eight[64];
 };
 
+enum flag {READ, PAD0, PAD1, FINISH};
+
 uint32_t F(uint32_t x, uint32_t y, uint32_t z)
 {
 	// Section 3.4
