@@ -3,6 +3,7 @@
 
 #include<stdio.h>
 #include<stdint.h>
+#include<stdlib.h>
 
 // Initial buffer values from Section 3.3
 uint32_t buffer[] = {
@@ -38,5 +39,24 @@ uint32_t I(uint32_t x, uint32_t y, uint32_t z)
 
 int main(int argc, char argv[])
 {
+	// Check has an argument
+	if (argc == 2)
+	{
+		printf("Error: expected filename as argument.\n");
+		return EXIT_FAILURE;
+	}
+
+	// Open file as read-only with no newline translation
+	// "rb" means read-only, binary
+	FILE* file = fopen(argv[1], "rb");
+
+	if (!file)
+	{
+		printf("Error: file could not be opened: %s\n", argv[1]);
+		return EXIT_FAILURE;
+	}
+
+	
+
 	return 0;
 }
