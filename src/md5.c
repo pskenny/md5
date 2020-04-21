@@ -5,6 +5,7 @@
 #include<stdint.h>
 #include<inttypes.h>
 #include<stdlib.h>
+#include<string.h>
 
 // Initial buffer values from Section 3.3
 uint32_t buffer[] = {
@@ -21,6 +22,8 @@ union block
     uint32_t thirtyTwo[16];
     uint8_t eight[64];
 };
+
+uint32_t *T;
 
 enum flag {READ, PAD0, PAD1, FINISH};
 
@@ -69,6 +72,17 @@ uint8_t nozerobytes(uint8_t noBits)
     return (result / 8ULL);
 }
 
+uint32_t* generateT()
+{
+	// From Section 3.4
+	// This step uses a 64-element table T[1 ... 64] constructed from the
+	// sine function. Let T[i] denote the i-th element of the table, which
+	// is equal to the integer part of 4294967296 times abs(sin(i)), where i
+	// is in radians. The elements of the table are given in the appendix.
+
+	return NULL;
+}
+
 // Read next 512 bit block from file (infile)
 // M - 512 bit block to store data
 // infile - file to read
@@ -100,9 +114,13 @@ int nextblock(union block* M, FILE* infile, uint64_t* nobits,
 }
 
 // Perform hash calculation on block using initial/previous hash values
-void nexthash( union block* M, uint32_t *H)
+// See Section 3.4
+void nexthash( union block* M)
 {
-	// Placeholder
+
+	// Generate table T if null
+	if(T == NULL)
+		T = generateT();
 }
 
 int main(int argc, char argv[])
@@ -133,7 +151,7 @@ int main(int argc, char argv[])
 	while(nextblock(&M, file, nobits, status))
 	{
 		// Calculate the next hash value
-		nexthash(&M, &buffer);
+		nexthash(&M);
 	}
 
 	// Close file
