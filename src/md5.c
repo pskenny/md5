@@ -113,17 +113,6 @@ uint8_t nozerobytes(uint8_t noBits)
 	return (result / 8ULL);
 }
 
-uint32_t *generateT()
-{
-	// From Section 3.4
-	// This step uses a 64-element table T[1 ... 64] constructed from the
-	// sine function. Let T[i] denote the i-th element of the table, which
-	// is equal to the integer part of 4294967296 times abs(sin(i)), where i
-	// is in radians. The elements of the table are given in the appendix.
-
-	return NULL;
-}
-
 // Read next 512 bit block from file (infile)
 // M - 512 bit block to store data
 // infile - file to read
@@ -162,8 +151,6 @@ void nexthash(union block *M)
 	uint32_t A = buffer[0], B = buffer[1], C = buffer[2], D = buffer[3];
 
 	// Aside: why isn't this in a loop like lots of other implementations? Reasoning is hard.
-
-	// TODO reduce last variable in all rounds by 1, otherwise an off-by-one array index error will occur, stupid
 
 	/* Round 1. */
 	A = round1(A, B, C, D, M->thirtyTwo[0], 7, 0);
