@@ -1,26 +1,24 @@
 // MD5 message-digest algorithm implementation from RFC 1321
 // Paul Kenny, G00326057, Software Development Year 4, Galway-Mayo Institute Of Technology
 
-#include<stdio.h>
-#include<stdint.h>
-#include<inttypes.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Initial buffer values from Section 3.3
-uint32_t buffer[] = {
+uint32_t buffer[4] = {
 	0x01234567,
 	0x89abcdef,
 	0xfedcba98,
-	0x76543210
-};
+	0x76543210};
 
 // block of data to process
-union block
-{
-    uint64_t sixtyFour[8];
-    uint32_t thirtyTwo[16];
-    uint8_t eight[64];
+union block {
+	uint64_t sixtyFour[8];
+	uint32_t thirtyTwo[16];
+	uint8_t eight[64];
 };
 
 // Precomputed table from https://en.wikipedia.org/wiki/MD5#Pseudocode
@@ -40,10 +38,15 @@ uint32_t T[64] = {
 	0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039,
 	0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
 	0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
-	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
-};
+	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391};
 
-enum flag {READ, PAD0, PAD1, FINISH};
+enum flag
+{
+	READ,
+	PAD0,
+	PAD1,
+	FINISH
+};
 
 uint32_t F(uint32_t x, uint32_t y, uint32_t z)
 {
@@ -69,28 +72,48 @@ uint32_t I(uint32_t x, uint32_t y, uint32_t z)
 	return y ^ (x | ~z);
 }
 
+uint32_t round1(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t k, uint32_t s, uint32_t t)
+{
+	return b + ((a + F(b, c, d) + k + T[t]) << s);
+}
+
+uint32_t round2(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t k, uint32_t s, uint32_t t)
+{
+	return b + ((a + G(b, c, d) + k + T[t]) << s);
+}
+
+uint32_t round3(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t k, uint32_t s, uint32_t t)
+{
+	return b + ((a + H(b, c, d) + k + T[t]) << s);
+}
+
+uint32_t round4(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t k, uint32_t s, uint32_t t)
+{
+	return b + ((a + I(b, c, d) + k + T[t]) << s);
+}
+
 // Return the number of 0 bytes to output
 uint8_t nozerobytes(uint8_t noBits)
 {
-    // ULL means unsigned long long, making sure numbers are treated as 64 bit
-    // Amount of bits left for padding
-    uint8_t result = 512ULL - (noBits % 512ULL);
+	// ULL means unsigned long long, making sure numbers are treated as 64 bit
+	// Amount of bits left for padding
+	uint8_t result = 512ULL - (noBits % 512ULL);
 
-    // check if there's enough room to do padding
-    if (result < 65) // 65 = 1 bit (required in spec) + 64 bits ()
-    {
-        // Add 512 to make more space
-        result += 512;
-    }
+	// check if there's enough room to do padding
+	if (result < 65) // 65 = 1 bit (required in spec) + 64 bits ()
+	{
+		// Add 512 to make more space
+		result += 512;
+	}
 
-    // Why? See video timestamp 34:10, 45:00
-    // 72 = 8 bits (1000 0000) + 64 bits (length of file)
-    result -= 72;
+	// Why? See video timestamp 34:10, 45:00
+	// 72 = 8 bits (1000 0000) + 64 bits (length of file)
+	result -= 72;
 
-    return (result / 8ULL);
+	return (result / 8ULL);
 }
 
-uint32_t* generateT()
+uint32_t *generateT()
 {
 	// From Section 3.4
 	// This step uses a 64-element table T[1 ... 64] constructed from the
@@ -106,14 +129,14 @@ uint32_t* generateT()
 // infile - file to read
 // nobits - number of bits currently read from infile
 // status - represents state
-int nextblock(union block* M, FILE* infile, uint64_t* nobits, 
-	enum flag* status)
+int nextblock(union block *M, FILE *infile, uint64_t *nobits,
+			  enum flag *status)
 {
 	// Following function incomplete, fragmented. Needs to determine appropriate action based on flag.
 	uint8_t i;
 
 	// Read 1 byte (into )
-	for(*nobits = 0, i = 0; fread(&M.eight[i], 1, 1, infile) == 1; *nobits += 8)
+	for (*nobits = 0, i = 0; fread(&M.eight[i], 1, 1, infile) == 1; *nobits += 8)
 	{
 		// Print out byte just read
 		printf("%02" PRIx8, M.eight[i]);
@@ -122,7 +145,7 @@ int nextblock(union block* M, FILE* infile, uint64_t* nobits,
 	// Print bits 1000 0000 (see Section )
 	printf("%02" PRIx8, 0x80);
 
-	for(uint64_t i = nozerobytes(*nobits); i > 0; --i)
+	for (uint64_t i = nozerobytes(*nobits); i > 0; --i)
 	{
 		// Print remaining 0's (minus 64, see nozerobytes documentation )
 		printf("%02" PRIx8, 0x00);
@@ -133,8 +156,91 @@ int nextblock(union block* M, FILE* infile, uint64_t* nobits,
 
 // Perform hash calculation on block using initial/previous hash values
 // See Section 3.4
-void nexthash(union block* M)
+void nexthash(union block *M)
 {
+	// Temporary copies
+	uint32_t A = buffer[0], B = buffer[1], C = buffer[2], D = buffer[3];
+
+	// Aside: why isn't this in a loop like lots of other implementations? Reasoning is hard.
+
+	// TODO reduce last variable in all rounds by 1, otherwise an off-by-one array index error will occur, stupid
+
+	/* Round 1. */
+	A = round1(A, B, C, D, M->thirtyTwo[0], 7, 0);
+	A = round1(D, A, B, C, M->thirtyTwo[1], 12, 1);
+	A = round1(C, D, A, B, M->thirtyTwo[2], 17, 2);
+	A = round1(B, C, D, A, M->thirtyTwo[3], 22, 3);
+	A = round1(A, B, C, D, M->thirtyTwo[4], 7, 4);
+	A = round1(D, A, B, C, M->thirtyTwo[5], 12, 5);
+	A = round1(C, D, A, B, M->thirtyTwo[6], 17, 6);
+	A = round1(B, C, D, A, M->thirtyTwo[7], 22, 7);
+	A = round1(A, B, C, D, M->thirtyTwo[8], 7, 8);
+	A = round1(D, A, B, C, M->thirtyTwo[9], 12, 9);
+	A = round1(C, D, A, B, M->thirtyTwo[10], 17, 10);
+	A = round1(B, C, D, A, M->thirtyTwo[11], 22, 11);
+	A = round1(A, B, C, D, M->thirtyTwo[12], 7, 12);
+	A = round1(D, A, B, C, M->thirtyTwo[13], 12, 13);
+	A = round1(C, D, A, B, M->thirtyTwo[14], 17, 14);
+	A = round1(B, C, D, A, M->thirtyTwo[15], 22, 15);
+
+	/* Round 2. */
+	A = round2(A, B, C, D, M->thirtyTwo[1], 5, 16);
+	A = round2(D, A, B, C, M->thirtyTwo[6], 9, 17);
+	A = round2(C, D, A, B, M->thirtyTwo[11], 14, 18);
+	A = round2(B, C, D, A, M->thirtyTwo[0], 20, 19);
+	A = round2(A, B, C, D, M->thirtyTwo[5], 5, 20);
+	A = round2(D, A, B, C, M->thirtyTwo[10], 9, 21);
+	A = round2(C, D, A, B, M->thirtyTwo[15], 14, 22);
+	A = round2(B, C, D, A, M->thirtyTwo[4], 20, 23);
+	A = round2(A, B, C, D, M->thirtyTwo[9], 5, 24);
+	A = round2(D, A, B, C, M->thirtyTwo[14], 9, 25);
+	A = round2(C, D, A, B, M->thirtyTwo[3], 14, 26);
+	A = round2(B, C, D, A, M->thirtyTwo[8], 20, 27);
+	A = round2(A, B, C, D, M->thirtyTwo[13], 5, 28);
+	A = round2(D, A, B, C, M->thirtyTwo[2], 9, 29);
+	A = round2(C, D, A, B, M->thirtyTwo[7], 14, 30);
+	A = round2(B, C, D, A, M->thirtyTwo[12], 20, 31);
+
+	/* Round 3. */
+	A = round3(A, B, C, D, M->thirtyTwo[5], 4, 32);
+	A = round3(D, A, B, C, M->thirtyTwo[8], 11, 33);
+	A = round3(C, D, A, B, M->thirtyTwo[11], 16, 34);
+	A = round3(B, C, D, A, M->thirtyTwo[14], 23, 35);
+	A = round3(A, B, C, D, M->thirtyTwo[1], 4, 36);
+	A = round3(D, A, B, C, M->thirtyTwo[4], 11, 37);
+	A = round3(C, D, A, B, M->thirtyTwo[7], 16, 38);
+	A = round3(B, C, D, A, M->thirtyTwo[10], 23, 39);
+	A = round3(A, B, C, D, M->thirtyTwo[13], 4, 40);
+	A = round3(D, A, B, C, M->thirtyTwo[0], 11, 41);
+	A = round3(C, D, A, B, M->thirtyTwo[3], 16, 42);
+	A = round3(B, C, D, A, M->thirtyTwo[6], 23, 43);
+	A = round3(A, B, C, D, M->thirtyTwo[9], 4, 44);
+	A = round3(D, A, B, C, M->thirtyTwo[12], 11, 45);
+	A = round3(C, D, A, B, M->thirtyTwo[15], 16, 46);
+	A = round3(B, C, D, A, M->thirtyTwo[2], 23, 47);
+
+	/* Round 4. */
+	A = round4(A, B, C, D, M->thirtyTwo[0], 6, 48);
+	A = round4(D, A, B, C, M->thirtyTwo[7], 10, 49);
+	A = round4(C, D, A, B, M->thirtyTwo[14], 15, 50);
+	A = round4(B, C, D, A, M->thirtyTwo[5], 21, 51);
+	A = round4(A, B, C, D, M->thirtyTwo[12], 6, 52);
+	A = round4(D, A, B, C, M->thirtyTwo[3], 10, 53);
+	A = round4(C, D, A, B, M->thirtyTwo[10], 15, 54);
+	A = round4(B, C, D, A, M->thirtyTwo[1], 21, 55);
+	A = round4(A, B, C, D, M->thirtyTwo[8], 6, 56);
+	A = round4(D, A, B, C, M->thirtyTwo[15], 10, 57);
+	A = round4(C, D, A, B, M->thirtyTwo[6], 15, 58);
+	A = round4(B, C, D, A, M->thirtyTwo[13], 21, 59);
+	A = round4(A, B, C, D, M->thirtyTwo[4], 6, 60);
+	A = round4(D, A, B, C, M->thirtyTwo[11], 10, 61);
+	A = round4(C, D, A, B, M->thirtyTwo[2], 15, 62);
+	A = round4(B, C, D, A, M->thirtyTwo[9], 21, 63);
+
+	buffer[0] += A;
+	buffer[1] += B;
+	buffer[2] += C;
+	buffer[3] += D;
 }
 
 int main(int argc, char argv[])
@@ -148,7 +254,7 @@ int main(int argc, char argv[])
 
 	// Open file as read-only with no newline translation
 	// "rb" means read-only, binary
-	FILE* file = fopen(argv[1], "rb");
+	FILE *file = fopen(argv[1], "rb");
 
 	if (!file)
 	{
@@ -162,7 +268,7 @@ int main(int argc, char argv[])
 	enum flag status = READ;
 
 	// Read next 512 bit block from file, then calculate hash
-	while(nextblock(&M, file, nobits, status))
+	while (nextblock(&M, file, nobits, status))
 	{
 		// Calculate the next hash value
 		nexthash(&M);
@@ -172,7 +278,7 @@ int main(int argc, char argv[])
 	fclose(file);
 
 	// Output hash
-	for(int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		printf("%02" PRIX32, H[i]);
 	}
