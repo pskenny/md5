@@ -267,7 +267,7 @@ int main(int argc, char argv[])
 	// Output hash
 	for (int i = 0; i < 4; i++)
 	{
-		printf("%02" PRIX32, H[i]);
+		printf("%02" PRIX32, buffer[i]);
 	}
 	printf("\n");
 
