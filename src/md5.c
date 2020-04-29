@@ -43,8 +43,7 @@ uint32_t T[64] = {
 enum flag
 {
 	READ,
-	PAD0,
-	PAD1,
+	PAD,
 	FINISH
 };
 
@@ -121,26 +120,46 @@ uint8_t nozerobytes(uint8_t noBits)
 int nextblock(union block *M, FILE *infile, uint64_t *nobits,
 			  enum flag *status)
 {
-	// Following function incomplete, fragmented. Needs to determine appropriate action based on flag.
-	uint8_t i;
+	if (*status == FINISH)
+		return 0; // Return finish, don't loop again in main
 
-	// Read 1 byte (into )
-	for (*nobits = 0, i = 0; fread(&M->eight[i], 1, 1, infile) == 1; *nobits += 8)
+	if (*status == PAD)
 	{
-		// Print out byte just read
-		printf("%02" PRIx8, M->eight[i]);
+		// Set bits 1 - 448 (56 * 8) to 0
+		for (int i = 0; i < 56; i++)
+			M->eight[i] = 0;
+		// Last 64bit contains the number of bits as per specification
+		M->sixtyFour[7] = *nobits;
+		*status = FINISH;
+		return 1; // Return non-finish int, another round of hashing still has to occur
 	}
 
-	// Print bits 1000 0000 (see Section )
-	printf("%02" PRIx8, 0x80);
+	// Remaining code only executes in READ state
 
-	for (uint64_t i = nozerobytes(*nobits); i > 0; --i)
+	// Read 64 1 bytes (512 bytes) from infile to M
+	size_t nobytesread = fread(M->eight, 1, 64, infile);
+	if (nobytesread == 64) // Has read 512 bits
+		return 1;
+
+	// If we can fit all padding in last block since less than 448 bits were read. Same code below as PAD flag
+	if (nobytesread < 56)
 	{
-		// Print remaining 0's (minus 64, see nozerobytes documentation )
-		printf("%02" PRIx8, 0x00);
+		// Add 1000 0000
+		M->eight[nobytesread] = 0x80;
+		for (int i = nobytesread + 1; i < 56; i++)
+			M->eight[i] = 0;
+		M->sixtyFour[7] = *nobits;
+		*status = FINISH;
+		return 1;
 	}
 
-	printf("%016" PRIx64, *nobits);
+	// Otherwise we have read between 56 (incl) and 64 (excl) bytes.
+	M->eight[nobytesread] = 0x80; // Add 1000 0000 to just after the last byte read
+	// Fill remaining block with 0's
+	for (int i = nobytesread + 1; i < 64; i++)
+		M->eight[i] = 0;
+	*status = PAD;
+	return 1;
 }
 
 // Perform hash calculation on block using initial/previous hash values
