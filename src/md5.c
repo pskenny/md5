@@ -138,6 +138,8 @@ int nextblock(union block *M, FILE *infile, uint64_t *nobits,
 
 	// Read 64 1 bytes (512 bytes) from infile to M
 	size_t nobytesread = fread(M->eight, 1, 64, infile);
+	// Add to number of bits read
+	*nobits = (nobytesread * 8);
 	if (nobytesread == 64) // Has read 512 bits
 		return 1;
 
