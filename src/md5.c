@@ -91,27 +91,6 @@ uint32_t round4(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t k, uint
 	return b + ((a + I(b, c, d) + k + T[t]) << s);
 }
 
-// Return the number of 0 bytes to output
-uint8_t nozerobytes(uint8_t noBits)
-{
-	// ULL means unsigned long long, making sure numbers are treated as 64 bit
-	// Amount of bits left for padding
-	uint8_t result = 512ULL - (noBits % 512ULL);
-
-	// check if there's enough room to do padding
-	if (result < 65) // 65 = 1 bit (required in spec) + 64 bits ()
-	{
-		// Add 512 to make more space
-		result += 512;
-	}
-
-	// Why? See video timestamp 34:10, 45:00
-	// 72 = 8 bits (1000 0000) + 64 bits (length of file)
-	result -= 72;
-
-	return (result / 8ULL);
-}
-
 // Read next 512 bit block from file (infile)
 // M - 512 bit block to store data
 // infile - file to read
