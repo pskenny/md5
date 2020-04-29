@@ -125,10 +125,10 @@ int nextblock(union block *M, FILE *infile, uint64_t *nobits,
 	uint8_t i;
 
 	// Read 1 byte (into )
-	for (*nobits = 0, i = 0; fread(&M.eight[i], 1, 1, infile) == 1; *nobits += 8)
+	for (*nobits = 0, i = 0; fread(&M->eight[i], 1, 1, infile) == 1; *nobits += 8)
 	{
 		// Print out byte just read
-		printf("%02" PRIx8, M.eight[i]);
+		printf("%02" PRIx8, M->eight[i]);
 	}
 
 	// Print bits 1000 0000 (see Section )
@@ -230,10 +230,10 @@ void nexthash(union block *M)
 	buffer[3] += D;
 }
 
-int main(int argc, char argv[])
+int main(int argc, char *argv[])
 {
 	// Check has an argument
-	if (argc == 2)
+	if (argc != 2)
 	{
 		printf("Error: expected filename as argument.\n");
 		return EXIT_FAILURE;
@@ -255,7 +255,7 @@ int main(int argc, char argv[])
 	enum flag status = READ;
 
 	// Read next 512 bit block from file, then calculate hash
-	while (nextblock(&M, file, nobits, status))
+	while (nextblock(&M, file, &nobits, &status))
 	{
 		// Calculate the next hash value
 		nexthash(&M);
